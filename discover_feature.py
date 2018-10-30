@@ -145,4 +145,3 @@ def sen(data_list):
     return pl_neg,pl_pos
 
 
-
