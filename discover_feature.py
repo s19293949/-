@@ -19,15 +19,18 @@ jieba.load_userdict('D:\\anaconda\\anaconda\\pkgs\\jieba-0.39\\jieba\\jbj.txt')
 def discover_feature(data,*text):
     key_list = []
     for key in data:
+        #句子根据标点符号分句
         keys = re.split('[，～。！？、,. ]',key)
         for i in keys:
             for keyword in text:
                 if keyword in i:
                     try:
+                        #re匹配关键词之后的字段
                         match=re.compile(r"(?<=%s).+" %keyword).search(i)
                         words = match.group()
                         words = pseg.cut(words)
                         for word, flag in words:
+                            #匹配修饰词
                             if 'a' in flag  or flag == 'vd' or flag == 'l' or flag == 'z' :
                                 word1 = keyword+str(word)
                                 key_list.append(word1)
@@ -49,7 +52,8 @@ def delect(data):
     dictionary=corpora.Dictionary(data)
     corpus=[dictionary.doc2bow(text) for text in data]
     tfidf = models.TfidfModel(corpus)
-    corpus_tfidf = tfidf[corpus]                
+    corpus_tfidf = tfidf[corpus]        
+    #删除包含某些字符的评论数据        
     query = '模板/积分/仙女/淘气值/没用/没有用/積分/繁荣昌盛/复制/送人/年级/京东/网购/模块/闲鱼/领导/阿里巴巴/乾隆/复制粘贴/合格/村/燕窝/七经八脉/凑'
     vec_bow = dictionary.doc2bow(query.split('/'))
     vec_tfidf = tfidf[vec_bow]
@@ -118,11 +122,13 @@ def keys_classification(data,*text):
     pl_neg = df[['评价']][df['情感'] == '负向']
     pl_pos = df[['评价']][df['情感'] == '正向']
     
-    
+    #整合评论
     df_pos = pd.concat([df_pos,pl_pos])
     df_neg = pd.concat([df_neg,pl_neg])
+    #去重
     df_pos = pd.DataFrame.drop_duplicates(df_pos, subset='评价', keep='first', inplace=False)
     df_neg = pd.DataFrame.drop_duplicates(df_neg, subset='评价', keep='first', inplace=False)
+    #取差集
     df_neg = difference(df_neg,df_pos)
     return df_pos,df_neg
 def sen(data_list):
@@ -130,7 +136,7 @@ def sen(data_list):
     c={"评价":data_list,"系数":senti}
     df = pd.DataFrame(c)
     df['情感'] = None
-    df.loc[df.系数>0.4,'情感'] = '正向'
+    df.loc[df.系数>=0.4,'情感'] = '正向'
     df.loc[df.系数<0.4,'情感'] = '负向'
     pl_qg = df[['评价','情感']]
     pl_neg = df[df.情感 == '负向']

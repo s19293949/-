@@ -18,8 +18,11 @@ print (nlp.dependency_parse(sentence))
 
 
 sentence = '碗的质量非常好'
+#分词
 word = nlp.word_tokenize(sentence)
+#句法分结构分析
 res = nlp.dependency_parse(sentence)
+#算法规则
 text = []
 for i in range(len(res)):
     text.append(res[i][0])
